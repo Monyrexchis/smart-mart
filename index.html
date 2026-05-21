@@ -1,0 +1,1548 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Shop</title>
+    <style>
+      :root {
+        --bg: #f4f7ff;
+        --card: #ffffff;
+        --text: #18223a;
+        --muted: #5c6b89;
+        --primary: #3b82f6;
+        --primary-2: #7c3aed;
+        --success: #0f9d58;
+        --danger: #c62828;
+        --shadow: 0 12px 35px rgba(26, 42, 74, 0.15);
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 15% 15%, #dbeafe, transparent 30%),
+          radial-gradient(circle at 85% 0%, #ede9fe, transparent 28%),
+          var(--bg);
+      }
+
+      .app {
+        width: min(1200px, 94vw);
+        margin: 1.4rem auto 2rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .hero {
+        background: linear-gradient(120deg, #1d4ed8, #6d28d9);
+        color: white;
+        border-radius: 18px;
+        padding: 1.1rem 1.1rem 1rem;
+        box-shadow: var(--shadow);
+      }
+      .hero h1 { margin: 0 0 .25rem; font-size: clamp(1.3rem, 3.8vw, 2rem); }
+      .hero p { margin: 0; color: #e4ebff; }
+
+      .top-nav {
+        display: flex;
+        gap: .6rem;
+        margin-top: .9rem;
+        flex-wrap: wrap;
+      }
+      .top-nav button {
+        background: linear-gradient(120deg, #22d3ee, #3b82f6);
+        border: 1px solid rgba(255,255,255,.35);
+        box-shadow: 0 8px 20px rgba(34, 211, 238, .25);
+      }
+      .top-nav button:nth-child(2) {
+        background: linear-gradient(120deg, #f59e0b, #ef4444);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, .22);
+      }
+      .top-nav button:nth-child(3) {
+        background: linear-gradient(120deg, #8b5cf6, #6366f1);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, .24);
+      }
+      .top-nav button.active {
+        background: linear-gradient(120deg, #16a34a, #22c55e);
+        color: #ffffff;
+        transform: translateY(-1px);
+      }
+
+      .page { display: none; }
+      .page.active { display: block; }
+
+      .card {
+        background: var(--card);
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+        border: 1px solid #e7ecf6;
+      }
+
+      .grid-2 {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1.15fr .85fr;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: .7rem;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+      label { display: grid; gap: .3rem; font-weight: 600; }
+      input, button, select {
+        border-radius: 10px;
+        border: 1px solid #cfd8e6;
+        padding: .62rem .75rem;
+        font: inherit;
+      }
+      button {
+        border: none;
+        background: linear-gradient(120deg, var(--primary), var(--primary-2));
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #edf2ff;
+        color: #24386a;
+        border: 1px solid #d7e0f6;
+      }
+      button.danger { background: linear-gradient(120deg, #dc2626, #b91c1c); }
+
+      .settings { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: .9rem; }
+      .settings label { min-width: 180px; color: #e6ebff; }
+      .settings select { background: rgba(255,255,255,.95); }
+
+      .toolbar { display: flex; flex-wrap: wrap; gap: .5rem; margin: .6rem 0 .9rem; }
+      .import-btn {
+        position: relative;
+        border-radius: 10px;
+        background: #edf2ff;
+        color: #24386a;
+        border: 1px solid #d7e0f6;
+        padding: .62rem .75rem;
+        font-weight: 700;
+      }
+      .import-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+      .status {
+        margin: 0;
+        padding: .6rem .75rem;
+        border-radius: 10px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-weight: 700;
+      }
+
+      .name-suggestions {
+        display: grid;
+        gap: .5rem;
+      }
+      .suggestion-item {
+        border: 1px solid #d7e3fb;
+        background: #f8fbff;
+        border-radius: 10px;
+        padding: .45rem;
+        display: grid;
+        grid-template-columns: 56px 1fr auto;
+        align-items: center;
+        gap: .55rem;
+      }
+      .suggestion-item img {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #edf2ff;
+      }
+      .suggestion-item .name { font-weight: 700; }
+      .suggestion-item .meta { color: var(--muted); font-size: .9rem; }
+
+      .product-grid {
+        display: grid;
+        gap: .8rem;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+      .product {
+        border: 1px solid #e1e8f5;
+        border-radius: 12px;
+        padding: .7rem;
+        display: grid;
+        gap: .5rem;
+        background: linear-gradient(180deg, #fff, #fbfdff);
+      }
+      .product img {
+        width: 100%;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+        border-radius: 9px;
+        background: #eef4ff;
+      }
+      .product h3 { margin: .2rem 0 0; font-size: 1rem; }
+      .price-row { display: grid; grid-template-columns: auto 1fr; gap: .35rem; align-items: center; }
+      .actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+      .actions button { flex: 1 1 48%; }
+
+      .count-note { color: var(--muted); font-weight: 600; margin: .4rem 0 .7rem; }
+
+      .danger-zone {
+        margin-top: .9rem;
+        border: 1px solid #f5c2c2;
+        background: #fff5f5;
+        border-radius: 12px;
+        padding: .75rem;
+        display: grid;
+        gap: .5rem;
+      }
+      .danger-zone small { color: #8a2f2f; }
+
+      .cloud-zone {
+        margin-top: .9rem;
+        border: 1px solid #c7d2fe;
+        background: linear-gradient(180deg, #eef2ff, #f8faff);
+        border-radius: 12px;
+        padding: .75rem;
+        display: grid;
+        gap: .55rem;
+      }
+      .cloud-zone h2, .cloud-zone h3 { margin: 0; }
+      .cloud-zone .cloud-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .45rem;
+      }
+      #cloud-status {
+        margin: 0;
+        padding: .5rem .65rem;
+        border-radius: 9px;
+        background: #e0ecff;
+        color: #174ea6;
+        font-weight: 700;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .5rem;
+        margin-top: .8rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .bill-wrap { display: grid; gap: .7rem; }
+      .bill-row {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        align-items: center;
+        gap: .45rem;
+        padding: .45rem 0;
+        border-bottom: 1px solid #edf1f8;
+      }
+      .bill-row button { width: 30px; height: 30px; padding: 0; }
+      .calc-grid {
+        display: grid;
+        gap: .6rem;
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+      .calc-line {
+        display: flex;
+        justify-content: space-between;
+        padding: .5rem .7rem;
+        border-radius: 10px;
+        background: #f6f9ff;
+      }
+      .summary-total {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--success);
+      }
+
+      @media (max-width: 980px) {
+        .grid-2 { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <h1 data-i18n="appTitle">Smart Shop</h1>
+        <p data-i18n="subtitle">Fast billing with database storage for big catalogs.</p>
+        <div class="settings">
+          <label>
+            <span data-i18n="languageLabel">Language</span>
+            <select id="language-select">
+              <option value="en">English</option>
+              <option value="km">ខ្មែរ</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="currencyLabel">Currency</span>
+            <select id="currency-select">
+              <option value="USD">USD ($)</option>
+              <option value="KHR">KHR (៛)</option>
+            </select>
+          </label>
+        </div>
+      </header>
+
+      <div class="top-nav">
+        <button id="page-billing-btn" class="active" type="button" data-i18n="billingPageBtn">Billing & Calculate</button>
+        <button id="page-manage-btn" type="button" data-i18n="managePageBtn">Upload & Manage Products</button>
+        <button id="page-cloud-btn" type="button" data-i18n="cloudPageBtn">Cloud Sync</button>
+      </div>
+
+      <section id="billing-page" class="page active">
+        <div class="grid-2">
+          <section class="card">
+            <h2 data-i18n="photoSectionTitle">1) Add/Check by Photo</h2>
+            <form id="scan-form" class="form-grid">
+              <label><span data-i18n="uploadPhotoLabel">Upload Photo</span><input id="scan-photo" type="file" accept="image/*" required /></label>
+              <button type="submit" data-i18n="findAddBtn">Find Product & Add</button>
+              <button id="check-bill-by-photo" class="secondary" type="button" data-i18n="checkBillBtn">Check in Bill</button>
+            </form>
+
+            <h2 data-i18n="nameSectionTitle">2) Add/Check by Name</h2>
+            <form id="search-form" class="form-grid">
+              <label><span data-i18n="searchNameLabel">Search Product Name</span><input id="search-name" required /></label>
+              <button type="submit" data-i18n="findNameAddBtn">Find Name & Add</button>
+              <button id="check-bill-by-name" class="secondary" type="button" data-i18n="checkNameBtn">Check in Bill by Name</button>
+            </form>
+            <div id="name-suggestions" class="name-suggestions"></div>
+
+            <p id="scan-result" class="status">Ready.</p>
+          </section>
+
+          <section class="card bill-wrap">
+            <h2 data-i18n="billSectionTitle">Bill + Calculator</h2>
+            <div id="bill-empty" data-i18n="billEmpty">No items yet.</div>
+            <div id="bill-list"></div>
+
+            <div class="calc-grid">
+              <label><span data-i18n="discountLabel">Discount %</span><input id="discount-input" type="number" min="0" max="100" step="0.01" value="0" /></label>
+              <label><span data-i18n="taxLabel">Tax %</span><input id="tax-input" type="number" min="0" max="100" step="0.01" value="0" /></label>
+              <label><span data-i18n="paidLabel">Paid Amount</span><input id="paid-input" type="number" min="0" step="0.01" value="0" /></label>
+            </div>
+
+            <div class="calc-line"><span data-i18n="subTotalLabel">Subtotal</span><strong id="sub-total">$0.00</strong></div>
+            <div class="calc-line"><span data-i18n="discountAmountLabel">Discount</span><strong id="discount-amount">$0.00</strong></div>
+            <div class="calc-line"><span data-i18n="taxAmountLabel">Tax</span><strong id="tax-amount">$0.00</strong></div>
+            <div class="calc-line summary-total"><span data-i18n="grandTotalLabel">Grand Total</span><span id="grand-total">$0.00</span></div>
+            <div class="calc-line"><span data-i18n="changeLabel">Change</span><strong id="change-amount">$0.00</strong></div>
+
+            <button id="clear-bill" class="secondary" type="button" data-i18n="clearBillBtn">Clear Bill</button>
+          </section>
+        </div>
+      </section>
+
+      <section id="manage-page" class="page">
+        <section class="card">
+          <h2 data-i18n="saveSectionTitle">Upload / Save Product</h2>
+          <p data-i18n="saveHint">Save the same product with 2-3 photos for better matching.</p>
+          <form id="product-form" class="form-grid">
+            <label><span data-i18n="productNameLabel">Product Name</span><input id="name" required /></label>
+            <label><span data-i18n="priceLabel">Price</span><input id="price" type="number" min="0" step="0.01" required /></label>
+            <label><span data-i18n="photoLabel">Photo</span><input id="photo" type="file" accept="image/*" required /></label>
+            <button type="submit" data-i18n="saveProductBtn">Save Product</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2 data-i18n="productsSectionTitle">Products Database</h2>
+          <p data-i18n="productsHint">Your data is kept safer: protected delete + backup tools. Cloud sync moved to Page 3.</p>
+          <p id="product-count" class="count-note">0 products</p>
+          <div class="toolbar">
+            <input id="catalog-search" placeholder="Search in catalog..." />
+            <button id="search-catalog" class="secondary" type="button" data-i18n="searchCatalogBtn">Search Catalog</button>
+            <button id="export-products" class="secondary" type="button" data-i18n="exportBtn">Export Backup</button>
+            <label class="import-btn"><span data-i18n="importBtn">Import Backup</span><input id="import-products" type="file" accept="application/json" /></label>
+          </div>
+
+
+          <div class="danger-zone">
+            <strong data-i18n="dangerTitle">Danger Zone</strong>
+            <small data-i18n="dangerHelp">To delete all products, type DELETE ALL in the box and click delete.</small>
+            <input id="delete-confirm-text" placeholder="Type DELETE ALL" />
+            <button id="clear-products" class="danger" type="button" data-i18n="clearProductsBtn">Delete All Products</button>
+          </div>
+
+          <div id="products" class="product-grid"></div>
+          <div class="pagination">
+            <button id="prev-page" class="secondary" type="button">◀ Prev</button>
+            <span id="page-info">Page 1</span>
+            <button id="next-page" class="secondary" type="button">Next ▶</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="cloud-page" class="page">
+        <section class="card">
+          <div class="cloud-zone">
+            <h2 data-i18n="cloudTitle">Cloud Sync (PC + Phone)</h2>
+            <small data-i18n="cloudHint">Use same account on both devices to auto-share products.</small>
+            <small data-i18n="cloudHint2">Use Supabase Project URL (https://xxxx.supabase.co), publishable/anon key, and your real email address.</small>
+            <div class="form-grid">
+              <label><span>Supabase URL</span><input id="cloud-url" placeholder="https://xxxx.supabase.co" /></label>
+              <label><span>Anon Key</span><input id="cloud-key" placeholder="supabase anon key" /></label>
+              <label><span>Email</span><input id="cloud-email" type="email" placeholder="shop@email.com" /></label>
+              <label><span>Password</span><input id="cloud-password" type="password" placeholder="********" /></label>
+              <label><span data-i18n="cloudRememberLabel">Remember password on this device</span><input id="cloud-remember-password" type="checkbox" checked /></label>
+            </div>
+            <div class="cloud-actions">
+              <button id="cloud-save" class="secondary" type="button" data-i18n="cloudSaveBtn">Save Cloud Config</button>
+              <button id="cloud-signup" class="secondary" type="button" data-i18n="cloudSignupBtn">Sign Up</button>
+              <button id="cloud-login" type="button" data-i18n="cloudLoginBtn">Login</button>
+              <button id="cloud-pull" class="secondary" type="button" data-i18n="cloudPullBtn">Pull from Cloud</button>
+              <button id="cloud-push" class="secondary" type="button" data-i18n="cloudPushBtn">Push to Cloud</button>
+              <button id="cloud-logout" class="secondary" type="button" data-i18n="cloudLogoutBtn">Logout</button>
+            </div>
+            <p id="cloud-status">Cloud: not connected</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <template id="product-template">
+      <article class="product">
+        <img alt="Product photo" />
+        <h3 class="product-name"></h3>
+        <div class="price-row"><span class="currency-mark">$</span><input class="price-input" type="number" min="0" step="0.01" /></div>
+        <div class="actions">
+          <button class="update-btn secondary" type="button" data-i18n="updatePriceBtn">Update Price</button>
+          <button class="add-btn" type="button" data-i18n="addToBillBtn">+ Add</button>
+          <button class="delete-one-btn danger" type="button" data-i18n="deleteOneBtn">Delete Item</button>
+        </div>
+      </article>
+    </template>
+
+    <script>
+      const DB_NAME = "easy-shop-db";
+      const DB_VERSION = 1;
+      const STORE_PRODUCTS = "products";
+      const STORAGE_SETTINGS = "easy-shop-settings-v2";
+      const STORAGE_PRODUCTS_FALLBACK = "easy-shop-products-fallback-v1";
+      const STORAGE_PRODUCTS_MIRROR = "easy-shop-products-mirror-v1";
+      const STORAGE_PRODUCTS_LEGACY = "easy-shop-products-v3";
+      const STORAGE_CLOUD = "smart-shop-cloud-v1";
+      const STORAGE_CLOUD_SESSION = "smart-shop-cloud-session-v1";
+      const USD_TO_KHR = 4100;
+      const PAGE_SIZE = 24;
+
+      const i18n = {
+        en: {
+          appTitle: "Smart Shop",
+          billingPageBtn: "Billing & Calculate",
+          managePageBtn: "Upload & Manage Products",
+          cloudPageBtn: "Cloud Sync",
+          subtitle: "Fast billing with database storage for big catalogs.",
+          languageLabel: "Language",
+          currencyLabel: "Currency",
+          saveSectionTitle: "1) Save Product",
+          saveHint: "Save the same product with 2-3 photos for better photo matching.",
+          productNameLabel: "Product Name",
+          priceLabel: "Price",
+          photoLabel: "Photo",
+          saveProductBtn: "Save Product",
+          photoSectionTitle: "2) Add/Check by Photo",
+          uploadPhotoLabel: "Upload Photo",
+          findAddBtn: "Find Product & Add",
+          checkBillBtn: "Check in Bill",
+          nameSectionTitle: "3) Add/Check by Name",
+          searchNameLabel: "Search Product Name",
+          findNameAddBtn: "Find Name & Add",
+          checkNameBtn: "Check in Bill by Name",
+          suggestionAddBtn: "Add",
+          noSuggestionText: "No similar item found.",
+          billSectionTitle: "Bill + Calculator",
+          billEmpty: "No items yet.",
+          discountLabel: "Discount %",
+          taxLabel: "Tax %",
+          paidLabel: "Paid Amount",
+          subTotalLabel: "Subtotal",
+          discountAmountLabel: "Discount",
+          taxAmountLabel: "Tax",
+          grandTotalLabel: "Grand Total",
+          changeLabel: "Change",
+          clearBillBtn: "Clear Bill",
+          productsSectionTitle: "Products Database",
+          productsHint: "IndexedDB database is used to support bigger catalogs (5k+ realistic on modern browsers). Cloud sync moved to page 3.",
+          searchCatalogBtn: "Search Catalog",
+          exportBtn: "Export Backup",
+          importBtn: "Import Backup",
+          clearProductsBtn: "Delete All Products",
+          dangerTitle: "Danger Zone",
+          dangerHelp: "To delete all products, type DELETE ALL in the box and click delete.",
+          cloudTitle: "Cloud Sync (PC + Phone)",
+          cloudHint: "Use same account on both devices to auto-share products.",
+          cloudHint2: "Use Supabase Project URL (https://xxxx.supabase.co), publishable/anon key, and your real email address.",
+          cloudSaveBtn: "Save Cloud Config",
+          cloudSignupBtn: "Sign Up",
+          cloudLoginBtn: "Login",
+          cloudRememberLabel: "Remember password on this device",
+          cloudPullBtn: "Pull from Cloud",
+          cloudPushBtn: "Push to Cloud",
+          cloudLogoutBtn: "Logout",
+          updatePriceBtn: "Update Price",
+          addToBillBtn: "+ Add",
+          deleteOneBtn: "Delete Item",
+          deleteOnePrompt: "Type DELETE to remove this item:",
+          deleteOneDone: "Deleted item:",
+        },
+        km: {
+          appTitle: "Smart Shop",
+          billingPageBtn: "ទំព័រគិតលុយ",
+          managePageBtn: "ទំព័របញ្ចូល/គ្រប់គ្រងទំនិញ",
+          cloudPageBtn: "Cloud Sync",
+          subtitle: "គិតលុយលឿន ជាមួយមូលដ្ឋានទិន្នន័យសម្រាប់បញ្ជីទំនិញច្រើន។",
+          languageLabel: "ភាសា",
+          currencyLabel: "រូបិយប័ណ្ណ",
+          saveSectionTitle: "1) រក្សាទុកទំនិញ",
+          saveHint: "រក្សាទុកទំនិញដដែល 2-3 រូប ដើម្បីស្គាល់ត្រឹមត្រូវ។",
+          productNameLabel: "ឈ្មោះទំនិញ",
+          priceLabel: "តម្លៃ",
+          photoLabel: "រូបភាព",
+          saveProductBtn: "រក្សាទុក",
+          photoSectionTitle: "2) បន្ថែម/ពិនិត្យតាមរូប",
+          uploadPhotoLabel: "អាប់ឡូតរូប",
+          findAddBtn: "ស្វែងរក និងបន្ថែម",
+          checkBillBtn: "ពិនិត្យក្នុងវិក្កយបត្រ",
+          nameSectionTitle: "3) បន្ថែម/ពិនិត្យតាមឈ្មោះ",
+          searchNameLabel: "ស្វែងរកឈ្មោះទំនិញ",
+          findNameAddBtn: "ស្វែងរកឈ្មោះ និងបន្ថែម",
+          checkNameBtn: "ពិនិត្យតាមឈ្មោះ",
+          suggestionAddBtn: "បន្ថែម",
+          noSuggestionText: "មិនមានទំនិញស្រដៀង។",
+          billSectionTitle: "វិក្កយបត្រ + គណនា",
+          billEmpty: "មិនទាន់មានទំនិញ។",
+          discountLabel: "បញ្ចុះតម្លៃ %",
+          taxLabel: "ពន្ធ %",
+          paidLabel: "ប្រាក់ទទួល",
+          subTotalLabel: "សរុបមុន",
+          discountAmountLabel: "បញ្ចុះតម្លៃ",
+          taxAmountLabel: "ពន្ធ",
+          grandTotalLabel: "សរុបចុងក្រោយ",
+          changeLabel: "ប្រាក់អាប់",
+          clearBillBtn: "សម្អាតវិក្កយបត្រ",
+          productsSectionTitle: "មូលដ្ឋានទិន្នន័យទំនិញ",
+          productsHint: "ប្រើ IndexedDB ដើម្បីគាំទ្របញ្ជីទំនិញធំ (5k+ អាចប្រើបានលើ browser ថ្មីៗ). Cloud sync នៅទំព័រ 3។",
+          searchCatalogBtn: "ស្វែងរកបញ្ជី",
+          exportBtn: "នាំចេញបម្រុងទុក",
+          importBtn: "នាំចូលបម្រុងទុក",
+          clearProductsBtn: "លុបទំនិញទាំងអស់",
+          dangerTitle: "តំបន់គ្រោះថ្នាក់",
+          dangerHelp: "ដើម្បីលុបទាំងអស់ សូមវាយពាក្យ DELETE ALL ហើយចុចលុប។",
+          cloudTitle: "Cloud Sync (PC + Phone)",
+          cloudHint: "ប្រើគណនីដូចគ្នា លើទូរស័ព្ទ/កុំព្យូទ័រ ដើម្បីចែករំលែកទិន្នន័យ។",
+          cloudHint2: "ប្រើ Project URL (https://xxxx.supabase.co), publishable/anon key, និងអ៊ីមែលពិតរបស់អ្នក។",
+          cloudSaveBtn: "រក្សាទុក Cloud Config",
+          cloudSignupBtn: "បង្កើតគណនី",
+          cloudLoginBtn: "ចូល",
+          cloudRememberLabel: "ចងចាំពាក្យសម្ងាត់លើឧបករណ៍នេះ",
+          cloudPullBtn: "ទាញពី Cloud",
+          cloudPushBtn: "ផ្ញើទៅ Cloud",
+          cloudLogoutBtn: "ចេញ",
+          updatePriceBtn: "កែតម្លៃ",
+          addToBillBtn: "+ បន្ថែម",
+          deleteOneBtn: "លុបទំនិញមួយ",
+          deleteOnePrompt: "សូមវាយ DELETE ដើម្បីលុបទំនិញនេះ:",
+          deleteOneDone: "បានលុបទំនិញ:",
+        },
+      };
+
+      const currencyInfo = { USD: { symbol: "$", decimals: 2 }, KHR: { symbol: "៛", decimals: 0 } };
+
+      const el = {
+        billingPageBtn: document.querySelector("#page-billing-btn"),
+        managePageBtn: document.querySelector("#page-manage-btn"),
+        cloudPageBtn: document.querySelector("#page-cloud-btn"),
+        billingPage: document.querySelector("#billing-page"),
+        managePage: document.querySelector("#manage-page"),
+        cloudPage: document.querySelector("#cloud-page"),
+        productForm: document.querySelector("#product-form"),
+        scanForm: document.querySelector("#scan-form"),
+        searchForm: document.querySelector("#search-form"),
+        searchNameInput: document.querySelector("#search-name"),
+        nameSuggestions: document.querySelector("#name-suggestions"),
+        scanResult: document.querySelector("#scan-result"),
+        products: document.querySelector("#products"),
+        productTemplate: document.querySelector("#product-template"),
+        billList: document.querySelector("#bill-list"),
+        billEmpty: document.querySelector("#bill-empty"),
+        clearBill: document.querySelector("#clear-bill"),
+        checkBillByPhoto: document.querySelector("#check-bill-by-photo"),
+        checkBillByName: document.querySelector("#check-bill-by-name"),
+        language: document.querySelector("#language-select"),
+        currency: document.querySelector("#currency-select"),
+        exportBtn: document.querySelector("#export-products"),
+        importInput: document.querySelector("#import-products"),
+        clearProducts: document.querySelector("#clear-products"),
+        catalogSearch: document.querySelector("#catalog-search"),
+        searchCatalog: document.querySelector("#search-catalog"),
+        prevPage: document.querySelector("#prev-page"),
+        nextPage: document.querySelector("#next-page"),
+        pageInfo: document.querySelector("#page-info"),
+        productCount: document.querySelector("#product-count"),
+        deleteConfirmText: document.querySelector("#delete-confirm-text"),
+        cloudUrl: document.querySelector("#cloud-url"),
+        cloudKey: document.querySelector("#cloud-key"),
+        cloudEmail: document.querySelector("#cloud-email"),
+        cloudPassword: document.querySelector("#cloud-password"),
+        cloudRememberPassword: document.querySelector("#cloud-remember-password"),
+        cloudSave: document.querySelector("#cloud-save"),
+        cloudSignup: document.querySelector("#cloud-signup"),
+        cloudLogin: document.querySelector("#cloud-login"),
+        cloudPull: document.querySelector("#cloud-pull"),
+        cloudPush: document.querySelector("#cloud-push"),
+        cloudLogout: document.querySelector("#cloud-logout"),
+        cloudStatus: document.querySelector("#cloud-status"),
+        discountInput: document.querySelector("#discount-input"),
+        taxInput: document.querySelector("#tax-input"),
+        paidInput: document.querySelector("#paid-input"),
+        subTotal: document.querySelector("#sub-total"),
+        discountAmount: document.querySelector("#discount-amount"),
+        taxAmount: document.querySelector("#tax-amount"),
+        grandTotal: document.querySelector("#grand-total"),
+        changeAmount: document.querySelector("#change-amount"),
+      };
+
+      let db;
+      let useFallbackStorage = false;
+      let bill = {};
+      let settings = loadSettings();
+      let currentPage = 1;
+      let currentQuery = "";
+      let lastLoadedCount = 0;
+      let suggestionTimer = null;
+      let cloudConfig = loadCloudConfig();
+      let cloudSession = null;
+
+      init();
+
+      async function init() {
+        try {
+          db = await openDb();
+          const existing = await getAllProductsFromDb();
+          if (!existing.length) {
+            const mirror = readMirrorProducts();
+            if (mirror.length) {
+              for (const item of mirror) await putProductToDb(item);
+            }
+          }
+        } catch {
+          useFallbackStorage = true;
+        }
+
+        el.cloudUrl.value = cloudConfig.url || "";
+        el.cloudKey.value = cloudConfig.key || "";
+        el.cloudEmail.value = cloudConfig.email || "";
+        el.cloudPassword.value = cloudConfig.password || "";
+        el.cloudRememberPassword.checked = cloudConfig.rememberPassword !== false;
+
+        el.language.value = settings.language;
+        el.currency.value = settings.currency;
+        applyTranslations();
+        setActivePage("billing");
+        bindEvents();
+        await renderProductsPage();
+        renderBill();
+        await tryRestoreCloudSession();
+
+        if (useFallbackStorage) {
+          showMessage(
+            "Using local backup storage mode. Use same browser and do not use private mode.",
+            "កំពុងប្រើ local backup mode។ សូមប្រើ browser ដដែល ហើយកុំប្រើ private mode។",
+          );
+        }
+      }
+
+      function bindEvents() {
+        el.billingPageBtn.addEventListener("click", () => setActivePage("billing"));
+        el.managePageBtn.addEventListener("click", () => setActivePage("manage"));
+        el.cloudPageBtn.addEventListener("click", () => setActivePage("cloud"));
+        el.language.addEventListener("change", () => {
+          settings.language = el.language.value;
+          persistSettings();
+          applyTranslations();
+          renderProductsPage();
+          renderBill();
+          onNameInputChange();
+        });
+        el.currency.addEventListener("change", () => {
+          settings.currency = el.currency.value;
+          persistSettings();
+          renderProductsPage();
+          renderBill();
+        });
+
+        el.productForm.addEventListener("submit", saveProductFromForm);
+        el.scanForm.addEventListener("submit", addByPhoto);
+        el.searchForm.addEventListener("submit", addByName);
+        el.searchNameInput.addEventListener("input", onNameInputChange);
+        el.searchNameInput.addEventListener("focus", onNameInputChange);
+        el.checkBillByPhoto.addEventListener("click", checkByPhoto);
+        el.checkBillByName.addEventListener("click", checkByName);
+        el.clearBill.addEventListener("click", () => { bill = {}; renderBill(); });
+
+        el.searchCatalog.addEventListener("click", () => {
+          currentPage = 1;
+          currentQuery = normalizeName(el.catalogSearch.value);
+          renderProductsPage();
+        });
+        el.prevPage.addEventListener("click", () => {
+          if (currentPage > 1) { currentPage -= 1; renderProductsPage(); }
+        });
+        el.nextPage.addEventListener("click", () => {
+          if (lastLoadedCount === PAGE_SIZE) { currentPage += 1; renderProductsPage(); }
+        });
+
+        el.exportBtn.addEventListener("click", exportProducts);
+        el.importInput.addEventListener("change", importProducts);
+        el.clearProducts.addEventListener("click", clearAllProducts);
+
+        el.cloudSave.addEventListener("click", saveCloudConfigFromForm);
+        el.cloudSignup.addEventListener("click", cloudSignUp);
+        el.cloudLogin.addEventListener("click", cloudLogin);
+        el.cloudPull.addEventListener("click", cloudPullFromServer);
+        el.cloudPush.addEventListener("click", cloudPushAllToServer);
+        el.cloudLogout.addEventListener("click", cloudLogout);
+
+        [el.discountInput, el.taxInput, el.paidInput].forEach((input) => input.addEventListener("input", renderBill));
+      }
+
+      async function saveProductFromForm(event) {
+        event.preventDefault();
+        const name = document.querySelector("#name").value.trim();
+        const priceInput = Number(document.querySelector("#price").value);
+        const file = document.querySelector("#photo").files[0];
+        if (!name || Number.isNaN(priceInput) || priceInput < 0 || !file) return;
+
+        const photo = await toDataUrl(file);
+        const photoHash = await createImageHashFromDataUrl(photo);
+        const nameNorm = normalizeName(name);
+        const priceUsd = toUsd(priceInput);
+
+        const existing = await findProductByNormalizedName(nameNorm);
+        if (existing) {
+          existing.priceUsd = priceUsd;
+          existing.photo = photo;
+          existing.photoHashes = existing.photoHashes || [];
+          if (!existing.photoHashes.includes(photoHash)) existing.photoHashes.push(photoHash);
+          await putProduct(existing);
+          showMessage(`Updated ${existing.name}. refs: ${existing.photoHashes.length}`, `បានកែប្រែ ${existing.name}។ refs: ${existing.photoHashes.length}`);
+        } else {
+          await putProduct({
+            id: crypto.randomUUID(),
+            name,
+            nameNorm,
+            priceUsd,
+            photo,
+            photoHashes: [photoHash],
+            updatedAt: Date.now(),
+          });
+          showMessage(`Saved ${name}.`, `បានរក្សាទុក ${name}។`);
+        }
+
+        el.productForm.reset();
+        currentPage = 1;
+        await renderProductsPage();
+      }
+
+      async function addByPhoto(event) {
+        event.preventDefault();
+        const file = document.querySelector("#scan-photo").files[0];
+        if (!file) return;
+        const queryHash = await createImageHashFromDataUrl(await toDataUrl(file));
+        const match = await findBestProductMatch(queryHash);
+        if (!match) return showMessage("No matching product found.", "រកមិនឃើញទំនិញ។");
+        addProductToBill(match);
+        showMessage(`Added: ${match.name}`, `បានបន្ថែម: ${match.name}`);
+        el.scanForm.reset();
+      }
+
+
+      async function onNameInputChange() {
+        clearTimeout(suggestionTimer);
+        suggestionTimer = setTimeout(async () => {
+          const raw = (el.searchNameInput.value || "").trim();
+          if (!raw) {
+            el.nameSuggestions.innerHTML = "";
+            return;
+          }
+
+          const query = normalizeName(raw);
+          const all = await getAllProducts();
+          const matches = all
+            .filter((item) => (item.nameNorm || "").includes(query))
+            .sort((a, b) => {
+              const aStarts = (a.nameNorm || "").startsWith(query) ? 0 : 1;
+              const bStarts = (b.nameNorm || "").startsWith(query) ? 0 : 1;
+              if (aStarts !== bStarts) return aStarts - bStarts;
+              return (b.updatedAt || 0) - (a.updatedAt || 0);
+            })
+            .slice(0, 6);
+
+          renderNameSuggestions(matches);
+        }, 120);
+      }
+
+      function renderNameSuggestions(matches) {
+        el.nameSuggestions.innerHTML = "";
+        if (!matches.length) {
+          const msg = document.createElement("div");
+          msg.className = "status";
+          msg.textContent = i18n[settings.language].noSuggestionText || "No similar item found.";
+          el.nameSuggestions.append(msg);
+          return;
+        }
+
+        matches.forEach((product) => {
+          const row = document.createElement("div");
+          row.className = "suggestion-item";
+          row.innerHTML = `
+            <img src="${product.photo}" alt="${product.name}" />
+            <div>
+              <div class="name">${product.name}</div>
+              <div class="meta">${formatMoney(product.priceUsd)}</div>
+            </div>
+            <button type="button" class="secondary">${i18n[settings.language].suggestionAddBtn || "Add"}</button>
+          `;
+
+          row.querySelector("img").addEventListener("click", () => {
+            el.searchNameInput.value = product.name;
+          });
+
+          row.querySelector(".name").addEventListener("click", () => {
+            el.searchNameInput.value = product.name;
+          });
+
+          row.querySelector("button").addEventListener("click", () => {
+            addProductToBill(product);
+            el.searchNameInput.value = product.name;
+            showMessage(`Added by suggestion: ${product.name}`, `បានបន្ថែមតាមសំណើរ: ${product.name}`);
+          });
+
+          el.nameSuggestions.append(row);
+        });
+      }
+
+      async function addByName(event) {
+        event.preventDefault();
+        const value = document.querySelector("#search-name").value;
+        const found = await findProductByName(value);
+        if (!found) return showMessage("Name not found.", "រកមិនឃើញឈ្មោះទំនិញ។");
+        addProductToBill(found);
+        showMessage(`Added by name: ${found.name}`, `បានបន្ថែមតាមឈ្មោះ: ${found.name}`);
+      }
+
+      async function checkByPhoto() {
+        const file = document.querySelector("#scan-photo").files[0];
+        if (!file) return showMessage("Choose photo first.", "សូមជ្រើសរូបភាពជាមុន។");
+        const queryHash = await createImageHashFromDataUrl(await toDataUrl(file));
+        const match = await findBestProductMatch(queryHash);
+        if (!match) return showMessage("No matching product found.", "រកមិនឃើញទំនិញ។");
+        showBillStatus(match);
+      }
+
+      async function checkByName() {
+        const found = await findProductByName(document.querySelector("#search-name").value);
+        if (!found) return showMessage("Name not found.", "រកមិនឃើញឈ្មោះទំនិញ។");
+        showBillStatus(found);
+      }
+
+      async function renderProductsPage() {
+        const allForCount = await getAllProducts();
+        const countFiltered = currentQuery ? allForCount.filter((p) => (p.nameNorm || "").includes(currentQuery)).length : allForCount.length;
+        el.productCount.textContent = `${countFiltered} products`;
+        const items = await getProductsPage(currentPage, currentQuery);
+        lastLoadedCount = items.length;
+        el.products.innerHTML = "";
+        const symbol = currencyInfo[settings.currency].symbol;
+
+        items.forEach((product) => {
+          const node = el.productTemplate.content.firstElementChild.cloneNode(true);
+          node.querySelector("img").src = product.photo;
+          node.querySelector("img").alt = product.name;
+          node.querySelector(".product-name").textContent = `${product.name} (${(product.photoHashes || []).length} refs)`;
+          const priceInput = node.querySelector(".price-input");
+          priceInput.value = fromUsd(product.priceUsd).toFixed(currencyInfo[settings.currency].decimals);
+          node.querySelector(".currency-mark").textContent = symbol;
+
+          node.querySelector(".update-btn").addEventListener("click", async () => {
+            const nextPrice = Number(priceInput.value);
+            if (Number.isNaN(nextPrice) || nextPrice < 0) return;
+            product.priceUsd = toUsd(nextPrice);
+            product.updatedAt = Date.now();
+            await putProduct(product);
+            showMessage(`Price updated: ${product.name}`, `បានកែតម្លៃ: ${product.name}`);
+            renderBill();
+          });
+
+          node.querySelector(".add-btn").addEventListener("click", () => addProductToBill(product));
+          node.querySelector(".delete-one-btn").addEventListener("click", async () => {
+            const typed = window.prompt(`${i18n[settings.language].deleteOnePrompt} ${product.name}`) || "";
+            if (typed.trim().toUpperCase() !== "DELETE") {
+              showMessage("Delete cancelled. Type DELETE exactly.", "បោះបង់ការលុប។ សូមវាយ DELETE ឲ្យត្រូវ។");
+              return;
+            }
+            await deleteSingleProduct(product.id);
+            showMessage(`${i18n[settings.language].deleteOneDone} ${product.name}`, `${i18n[settings.language].deleteOneDone} ${product.name}`);
+          });
+          el.products.append(node);
+        });
+
+        el.pageInfo.textContent = `Page ${currentPage} (${items.length})`;
+        el.prevPage.disabled = currentPage <= 1;
+        el.nextPage.disabled = items.length < PAGE_SIZE;
+      }
+
+
+      async function deleteSingleProduct(productId) {
+        if (useFallbackStorage) {
+          const all = readFallbackProducts().filter((item) => item.id !== productId);
+          writeFallbackProducts(all);
+          writeMirrorProducts(all);
+        } else {
+          const tx = db.transaction(STORE_PRODUCTS, "readwrite");
+          tx.objectStore(STORE_PRODUCTS).delete(productId);
+          await txDone(tx);
+          const all = await getAllProductsFromDb();
+          writeMirrorProducts(all);
+        }
+
+        if (bill[productId]) {
+          delete bill[productId];
+          renderBill();
+        }
+
+        await renderProductsPage();
+        await cloudDeleteProduct(productId);
+      }
+
+      function addProductToBill(product) {
+        if (!bill[product.id]) bill[product.id] = { id: product.id, name: product.name, priceUsd: product.priceUsd, qty: 0 };
+        bill[product.id].qty += 1;
+        bill[product.id].priceUsd = product.priceUsd;
+        renderBill();
+      }
+
+      function renderBill() {
+        const items = Object.values(bill).filter((item) => item.qty > 0);
+        el.billEmpty.style.display = items.length ? "none" : "block";
+        el.billList.innerHTML = "";
+
+        let subTotalUsd = 0;
+        items.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "bill-row";
+          const lineUsd = item.priceUsd * item.qty;
+          subTotalUsd += lineUsd;
+          row.innerHTML = `<strong>${item.name}</strong><span>${formatMoney(item.priceUsd)} × ${item.qty}</span><span>${formatMoney(lineUsd)}</span><button type="button">-</button>`;
+          row.querySelector("button").addEventListener("click", () => {
+            item.qty -= 1;
+            if (item.qty <= 0) delete bill[item.id];
+            renderBill();
+          });
+          el.billList.append(row);
+        });
+
+        const discountPct = clamp(Number(el.discountInput.value) || 0, 0, 100);
+        const taxPct = clamp(Number(el.taxInput.value) || 0, 0, 100);
+        const paidUsd = toUsd(Number(el.paidInput.value) || 0);
+
+        const discountUsd = subTotalUsd * (discountPct / 100);
+        const afterDiscountUsd = subTotalUsd - discountUsd;
+        const taxUsd = afterDiscountUsd * (taxPct / 100);
+        const grandUsd = afterDiscountUsd + taxUsd;
+        const changeUsd = paidUsd - grandUsd;
+
+        el.subTotal.textContent = formatMoney(subTotalUsd);
+        el.discountAmount.textContent = formatMoney(discountUsd);
+        el.taxAmount.textContent = formatMoney(taxUsd);
+        el.grandTotal.textContent = formatMoney(grandUsd);
+        el.changeAmount.textContent = formatMoney(changeUsd);
+        el.changeAmount.style.color = changeUsd < 0 ? "#b91c1c" : "#0f9d58";
+      }
+
+      function showBillStatus(product) {
+        const item = bill[product.id];
+        if (!item || item.qty <= 0) return showMessage(`${product.name} is not in bill yet.`, `${product.name} មិនទាន់មានក្នុងវិក្កយបត្រ។`);
+        showMessage(`${item.name}: qty ${item.qty}, line ${formatMoney(item.qty * item.priceUsd)}`, `${item.name}: ចំនួន ${item.qty}, សរុប ${formatMoney(item.qty * item.priceUsd)}`);
+      }
+
+      async function exportProducts() {
+        const all = await getAllProducts();
+        const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), products: all }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `easy-shop-db-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      async function importProducts() {
+        const file = el.importInput.files[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const json = JSON.parse(text);
+          const items = Array.isArray(json?.products) ? json.products : [];
+          for (const item of items) {
+            const migrated = {
+              id: item.id || crypto.randomUUID(),
+              name: String(item.name || "Unnamed"),
+              nameNorm: normalizeName(item.name || "Unnamed"),
+              priceUsd: Number(item.priceUsd ?? item.price ?? 0),
+              photo: String(item.photo || ""),
+              photoHashes: Array.isArray(item.photoHashes) ? item.photoHashes : item.photoHash ? [String(item.photoHash)] : [],
+              updatedAt: Number(item.updatedAt || Date.now()),
+            };
+            if (migrated.name && migrated.photo && migrated.photoHashes.length) await putProduct(migrated);
+          }
+          showMessage(`Imported ${items.length} products.`, `បាននាំចូល ${items.length} ទំនិញ។`);
+          currentPage = 1;
+          await renderProductsPage();
+        } catch {
+          showMessage("Invalid file.", "ឯកសារមិនត្រឹមត្រូវ។");
+        } finally {
+          el.importInput.value = "";
+        }
+      }
+
+      async function clearAllProducts() {
+        const phrase = (el.deleteConfirmText.value || "").trim().toUpperCase();
+        if (phrase !== "DELETE ALL") {
+          showMessage("Type DELETE ALL first to protect your data.", "សូមវាយ DELETE ALL ជាមុន ដើម្បីការពារទិន្នន័យ។");
+          return;
+        }
+        const sure = window.confirm(settings.language === "km" ? "លុបទំនិញទាំងអស់មែនទេ?" : "Delete ALL products now?");
+        if (!sure) return;
+        if (useFallbackStorage) {
+          writeFallbackProducts([]);
+        } else {
+          const tx = db.transaction(STORE_PRODUCTS, "readwrite");
+          tx.objectStore(STORE_PRODUCTS).clear();
+          await txDone(tx);
+        }
+        writeMirrorProducts([]);
+        el.deleteConfirmText.value = "";
+        bill = {};
+        renderBill();
+        currentPage = 1;
+        await renderProductsPage();
+        await cloudClearAllProducts();
+        showMessage("All products cleared.", "បានលុបទំនិញទាំងអស់។");
+      }
+
+      function openDb() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = (event) => {
+            const upgradeDb = event.target.result;
+            if (!upgradeDb.objectStoreNames.contains(STORE_PRODUCTS)) {
+              const store = upgradeDb.createObjectStore(STORE_PRODUCTS, { keyPath: "id" });
+              store.createIndex("nameNorm", "nameNorm", { unique: false });
+              store.createIndex("updatedAt", "updatedAt", { unique: false });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      function txDone(tx) {
+        return new Promise((resolve, reject) => {
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+          tx.onabort = () => reject(tx.error);
+        });
+      }
+
+      async function putProduct(product) {
+        if (useFallbackStorage) {
+          const all = readFallbackProducts();
+          const idx = all.findIndex((item) => item.id === product.id);
+          if (idx >= 0) all[idx] = product;
+          else all.push(product);
+          writeFallbackProducts(all);
+          writeMirrorProducts(all);
+          await cloudUpsertProduct(product);
+          return;
+        }
+        await putProductToDb(product);
+        const all = await getAllProductsFromDb();
+        writeMirrorProducts(all);
+        await cloudUpsertProduct(product);
+      }
+
+      function putProductToDb(product) {
+        const tx = db.transaction(STORE_PRODUCTS, "readwrite");
+        tx.objectStore(STORE_PRODUCTS).put(product);
+        return txDone(tx);
+      }
+
+      async function getAllProducts() {
+        if (useFallbackStorage) return readFallbackProducts();
+        const all = await getAllProductsFromDb();
+        if (all.length) writeMirrorProducts(all);
+        return all;
+      }
+
+      function getAllProductsFromDb() {
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_PRODUCTS, "readonly");
+          const req = tx.objectStore(STORE_PRODUCTS).getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function getProductsPage(page, query) {
+        const all = await getAllProducts();
+        const filtered = query ? all.filter((p) => (p.nameNorm || "").includes(query)) : all;
+        filtered.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        const start = (page - 1) * PAGE_SIZE;
+        return filtered.slice(start, start + PAGE_SIZE);
+      }
+
+      async function findProductByNormalizedName(nameNorm) {
+        if (useFallbackStorage) {
+          const all = readFallbackProducts();
+          return all.find((item) => item.nameNorm === nameNorm) || null;
+        }
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_PRODUCTS, "readonly");
+          const index = tx.objectStore(STORE_PRODUCTS).index("nameNorm");
+          const req = index.get(nameNorm);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function findProductByName(raw) {
+        const query = normalizeName(raw || "");
+        if (!query) return null;
+        const exact = await findProductByNormalizedName(query);
+        if (exact) return exact;
+        const all = await getAllProducts();
+        return all.find((item) => (item.nameNorm || "").includes(query)) || null;
+      }
+
+      async function findBestProductMatch(queryHash) {
+        const all = await getAllProducts();
+        let best = null;
+        const threshold = 12;
+        for (const product of all) {
+          const hashes = product.photoHashes || [];
+          for (const ref of hashes) {
+            const distance = hammingDistance(ref, queryHash);
+            if (!best || distance < best.distance) best = { product, distance };
+          }
+        }
+        return best && best.distance <= threshold ? best.product : null;
+      }
+
+
+
+      function loadCloudConfig() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_CLOUD)) || {};
+          return {
+            url: String(parsed.url || "").trim(),
+            key: String(parsed.key || "").trim(),
+            email: String(parsed.email || "").trim(),
+            password: String(parsed.password || ""),
+            rememberPassword: parsed.rememberPassword !== false,
+          };
+        } catch {
+          return { url: "", key: "", email: "", password: "", rememberPassword: true };
+        }
+      }
+
+      function persistCloudConfig() {
+        localStorage.setItem(STORAGE_CLOUD, JSON.stringify(cloudConfig));
+      }
+
+      function loadCloudSession() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_CLOUD_SESSION)) || {};
+          return {
+            refreshToken: String(parsed.refreshToken || "").trim(),
+            userId: String(parsed.userId || "").trim(),
+          };
+        } catch {
+          return { refreshToken: "", userId: "" };
+        }
+      }
+
+      function persistCloudSession() {
+        if (!cloudSession?.refreshToken || !cloudSession?.userId) return;
+        localStorage.setItem(
+          STORAGE_CLOUD_SESSION,
+          JSON.stringify({ refreshToken: cloudSession.refreshToken, userId: cloudSession.userId }),
+        );
+      }
+
+      function clearCloudSession() {
+        localStorage.removeItem(STORAGE_CLOUD_SESSION);
+      }
+
+      function applyCloudSessionFromAuthData(data) {
+        cloudSession = {
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token || cloudSession?.refreshToken || "",
+          userId: data.user?.id || cloudSession?.userId || "",
+        };
+        persistCloudSession();
+      }
+
+      async function tryRestoreCloudSession() {
+        if (!cloudConfig.url || !cloudConfig.key) return;
+        const saved = loadCloudSession();
+        if (!saved.refreshToken) return;
+
+        cloudSession = {
+          accessToken: "",
+          refreshToken: saved.refreshToken,
+          userId: saved.userId,
+        };
+
+        try {
+          const res = await fetch(`${cloudConfig.url}/auth/v1/token?grant_type=refresh_token`, {
+            method: "POST",
+            headers: cloudHeaders(),
+            body: JSON.stringify({ refresh_token: saved.refreshToken }),
+          });
+
+          if (!res.ok) {
+            cloudSession = null;
+            clearCloudSession();
+            return;
+          }
+
+          const data = await res.json();
+          applyCloudSessionFromAuthData(data);
+          setCloudStatus("Cloud connected (auto login).", "success");
+        } catch {
+          cloudSession = null;
+        }
+      }
+
+      function saveCloudConfigFromForm(showSuccessMessage = true) {
+        cloudConfig = {
+          url: (el.cloudUrl.value || "").trim().replace(/\/$/, ""),
+          key: (el.cloudKey.value || "").trim(),
+          email: (el.cloudEmail.value || "").trim(),
+          password: el.cloudRememberPassword.checked ? (el.cloudPassword.value || "") : "",
+          rememberPassword: el.cloudRememberPassword.checked,
+        };
+
+        const validation = validateCloudConfig(cloudConfig, false);
+        if (!validation.ok) {
+          setCloudStatus(validation.message, "error");
+          return false;
+        }
+
+        persistCloudConfig();
+        if (showSuccessMessage) setCloudStatus("Cloud config saved.", "success");
+        return true;
+      }
+
+      function validateCloudConfig(config, requirePassword) {
+        const password = (el.cloudPassword.value || "").trim();
+
+        if (!config.url || !config.key || !config.email || (requirePassword && !password)) {
+          return { ok: false, message: "Fill URL, key, email, password." };
+        }
+
+        if (!/^https:\/\/.+\.supabase\.co$/i.test(config.url)) {
+          return { ok: false, message: "Supabase URL must be your real project URL (example: https://abcxyz.supabase.co). Do not keep 'xxxx'." };
+        }
+
+        if (/https:\/\/xxxx\.supabase\.co/i.test(config.url)) {
+          return { ok: false, message: "Replace 'xxxx' with your real Supabase project id in the URL." };
+        }
+
+        const looksLikeBrowserKey = config.key.startsWith("eyJ") || config.key.startsWith("sb_publishable_") || config.key.startsWith("sb_anon_");
+        if (!looksLikeBrowserKey) {
+          return { ok: false, message: "Use Supabase browser key (publishable/anon). Do not use service_role." };
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.email)) {
+          return { ok: false, message: "Use a real email address (example: shop@email.com)." };
+        }
+
+        if (config.email.startsWith("eyJ") || config.email.startsWith("sb_publishable_") || config.email.startsWith("sb_anon_")) {
+          return { ok: false, message: "Email field looks wrong. Put anon key in Anon Key field." };
+        }
+
+        if (config.url.startsWith("eyJ") || config.url.startsWith("sb_publishable_") || config.url.startsWith("sb_anon_")) {
+          return { ok: false, message: "URL field looks wrong. Put key in Anon Key field." };
+        }
+
+        return { ok: true };
+      }
+
+      function setCloudStatus(message, type = "info") {
+        el.cloudStatus.textContent = message;
+        el.cloudStatus.style.color = type === "error" ? "#b91c1c" : type === "success" ? "#0f9d58" : "#174ea6";
+      }
+
+      function cloudHeaders(withAuth = false) {
+        const headers = {
+          apikey: cloudConfig.key,
+          "Content-Type": "application/json",
+        };
+        if (withAuth && cloudSession?.accessToken) headers.Authorization = `Bearer ${cloudSession.accessToken}`;
+        return headers;
+      }
+
+      async function cloudSignUp() {
+        if (!saveCloudConfigFromForm(false)) return;
+        const password = (el.cloudPassword.value || "").trim();
+        const validation = validateCloudConfig(cloudConfig, true);
+        if (!validation.ok) {
+          setCloudStatus(validation.message, "error");
+          return;
+        }
+        setCloudStatus("Signing up...", "info");
+        const res = await fetch(`${cloudConfig.url}/auth/v1/signup`, {
+          method: "POST",
+          headers: cloudHeaders(),
+          body: JSON.stringify({ email: cloudConfig.email, password }),
+        });
+        if (!res.ok) {
+          setCloudStatus("Sign up failed.", "error");
+          return;
+        }
+        setCloudStatus("Sign up done. Now login.", "success");
+      }
+
+      async function cloudLogin() {
+        if (!saveCloudConfigFromForm(false)) return;
+        const password = (el.cloudPassword.value || "").trim();
+        const validation = validateCloudConfig(cloudConfig, true);
+        if (!validation.ok) {
+          setCloudStatus(validation.message, "error");
+          return;
+        }
+        setCloudStatus("Logging in...", "info");
+        const res = await fetch(`${cloudConfig.url}/auth/v1/token?grant_type=password`, {
+          method: "POST",
+          headers: cloudHeaders(),
+          body: JSON.stringify({ email: cloudConfig.email, password }),
+        });
+        if (!res.ok) {
+          setCloudStatus("Login failed.", "error");
+          return;
+        }
+        const data = await res.json();
+        applyCloudSessionFromAuthData(data);
+        setCloudStatus("Cloud connected.", "success");
+        await cloudPullFromServer();
+      }
+
+      function cloudLogout() {
+        cloudSession = null;
+        clearCloudSession();
+        setCloudStatus("Cloud logged out.", "info");
+      }
+
+      async function cloudPullFromServer() {
+        if (!cloudSession?.userId) {
+          setCloudStatus("Login cloud first.", "error");
+          return;
+        }
+        const url = `${cloudConfig.url}/rest/v1/shop_products?user_id=eq.${cloudSession.userId}&select=product_id,data,updated_at`;
+        const res = await fetch(url, { headers: cloudHeaders(true) });
+        if (!res.ok) {
+          setCloudStatus("Pull failed. Check table or policies.", "error");
+          return;
+        }
+        const rows = await res.json();
+        const products = rows.map((r) => r.data).filter(Boolean);
+
+        if (useFallbackStorage) {
+          writeFallbackProducts(products);
+          writeMirrorProducts(products);
+        } else {
+          const tx = db.transaction(STORE_PRODUCTS, "readwrite");
+          const store = tx.objectStore(STORE_PRODUCTS);
+          store.clear();
+          products.forEach((product) => store.put(product));
+          await txDone(tx);
+          writeMirrorProducts(products);
+        }
+
+        currentPage = 1;
+        await renderProductsPage();
+        setCloudStatus(`Pulled ${products.length} products from cloud.`, "success");
+      }
+
+      async function cloudPushAllToServer() {
+        if (!cloudSession?.userId) {
+          setCloudStatus("Login cloud first.", "error");
+          return;
+        }
+        const all = await getAllProducts();
+        for (const item of all) await cloudUpsertProduct(item);
+        setCloudStatus(`Pushed ${all.length} products to cloud.`, "success");
+      }
+
+      async function cloudUpsertProduct(product) {
+        if (!cloudSession?.userId) return;
+        const body = [{
+          user_id: cloudSession.userId,
+          product_id: product.id,
+          data: product,
+          updated_at: Date.now(),
+        }];
+        await fetch(`${cloudConfig.url}/rest/v1/shop_products`, {
+          method: "POST",
+          headers: {
+            ...cloudHeaders(true),
+            Prefer: "resolution=merge-duplicates,return=minimal",
+          },
+          body: JSON.stringify(body),
+        });
+      }
+
+      async function cloudDeleteProduct(productId) {
+        if (!cloudSession?.userId) return;
+        const url = `${cloudConfig.url}/rest/v1/shop_products?user_id=eq.${cloudSession.userId}&product_id=eq.${productId}`;
+        await fetch(url, { method: "DELETE", headers: cloudHeaders(true) });
+      }
+
+      async function cloudClearAllProducts() {
+        if (!cloudSession?.userId) return;
+        const url = `${cloudConfig.url}/rest/v1/shop_products?user_id=eq.${cloudSession.userId}`;
+        await fetch(url, { method: "DELETE", headers: cloudHeaders(true) });
+      }
+
+      function readFallbackProducts() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_PRODUCTS_FALLBACK)) || [];
+          if (Array.isArray(parsed) && parsed.length) return parsed;
+          const legacy = JSON.parse(localStorage.getItem(STORAGE_PRODUCTS_LEGACY)) || [];
+          return Array.isArray(legacy) ? legacy.map((item) => ({
+            ...item,
+            nameNorm: normalizeName(item.name || ""),
+            priceUsd: Number(item.priceUsd ?? item.price ?? 0),
+            photoHashes: Array.isArray(item.photoHashes) ? item.photoHashes : item.photoHash ? [String(item.photoHash)] : [],
+            updatedAt: Number(item.updatedAt || Date.now()),
+          })).filter((item) => item.name && item.photo) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function writeFallbackProducts(items) {
+        localStorage.setItem(STORAGE_PRODUCTS_FALLBACK, JSON.stringify(items));
+      }
+
+      function readMirrorProducts() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_PRODUCTS_MIRROR)) || [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function writeMirrorProducts(items) {
+        localStorage.setItem(STORAGE_PRODUCTS_MIRROR, JSON.stringify(items));
+      }
+
+
+      function setActivePage(page) {
+        const billing = page === "billing";
+        const manage = page === "manage";
+        const cloud = page === "cloud";
+
+        el.billingPage.classList.toggle("active", billing);
+        el.managePage.classList.toggle("active", manage);
+        el.cloudPage.classList.toggle("active", cloud);
+
+        el.billingPageBtn.classList.toggle("active", billing);
+        el.managePageBtn.classList.toggle("active", manage);
+        el.cloudPageBtn.classList.toggle("active", cloud);
+      }
+
+      function loadSettings() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_SETTINGS)) || {};
+          return {
+            language: parsed.language === "km" ? "km" : "en",
+            currency: parsed.currency === "KHR" ? "KHR" : "USD",
+          };
+        } catch {
+          return { language: "en", currency: "USD" };
+        }
+      }
+
+      function persistSettings() { localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings)); }
+      function normalizeName(name) { return String(name).trim().toLowerCase().replace(/\s+/g, " "); }
+      function toUsd(value) { return settings.currency === "KHR" ? value / USD_TO_KHR : value; }
+      function fromUsd(value) { return settings.currency === "KHR" ? value * USD_TO_KHR : value; }
+      function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+      function formatMoney(valueUsd) {
+        const amount = fromUsd(valueUsd);
+        const { symbol, decimals } = currencyInfo[settings.currency];
+        return `${symbol}${amount.toFixed(decimals)}`;
+      }
+
+      function showMessage(en, km) {
+        el.scanResult.textContent = settings.language === "km" ? km : en;
+      }
+
+      function applyTranslations() {
+        const table = i18n[settings.language];
+        document.documentElement.lang = settings.language;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.dataset.i18n;
+          if (table[key]) node.textContent = table[key];
+        });
+      }
+
+      function toDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function hammingDistance(a, b) {
+        let d = 0;
+        for (let i = 0; i < Math.min(a.length, b.length); i += 1) if (a[i] !== b[i]) d += 1;
+        return d + Math.abs(a.length - b.length);
+      }
+
+      function createImageHashFromDataUrl(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 8;
+            canvas.height = 8;
+            const context = canvas.getContext("2d");
+            context.drawImage(image, 0, 0, 8, 8);
+            const pixels = context.getImageData(0, 0, 8, 8).data;
+            const gray = [];
+            for (let i = 0; i < pixels.length; i += 4) gray.push(Math.round((pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3));
+            const avg = gray.reduce((sum, v) => sum + v, 0) / gray.length;
+            resolve(gray.map((v) => (v >= avg ? "1" : "0")).join(""));
+          };
+          image.onerror = reject;
+          image.src = dataUrl;
+        });
+      }
+    </script>
+  </body>
+</html>
